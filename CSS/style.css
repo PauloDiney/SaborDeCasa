@@ -188,7 +188,7 @@ main {
   flex-direction: column;
   background-color: var(--branco);
   border-radius: 10px;
-  box-shadow: 0px 10px 1px rgb(189, 189, 189);
+  box-shadow: 0px 5px 1px rgb(189, 189, 189);
 }
 
 .product_img {
