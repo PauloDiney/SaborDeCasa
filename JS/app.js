@@ -129,8 +129,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Gera número do pedido de 5 dígitos aleatórios
+    const numeroPedido = Math.floor(10000 + Math.random() * 90000);
+
     let itensArray = [];
-    let message = `Olá! Gostaria de fazer o seguinte pedido:%0A`;
+    let message = `Olá! Gostaria de fazer o seguinte pedido (Nº ${numeroPedido}):%0A`;
     cart.forEach(item => {
       const totalQtd = item.qty * item.quantidade;
       const totalItem = item.qty * item.price;
@@ -141,15 +144,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalGeral = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
     message += `%0ATotal: R$${totalGeral.toFixed(2)}%0A`;
     message += `%0AEndereço: ${encodeURIComponent(endereco)}`;
+    message += `%0A*Número do pedido: ${numeroPedido}*`;
 
     // Envia para o Google Sheets
-    fetch('https://script.google.com/macros/s/AKfycbzB_5FpBjyGflQAMbVAitXvMUlpVMEmI23UG6NJ7mZcThm-VkoFBYmhExEY1BdA2ziE/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbxmQ-Nm-MjHvYs3kCY6NHbJwh3KTC1OiNnxNbbNJpuIA0EcSenSKJiKUvrJBkOPb09N/exec', {
       method: 'POST',
       mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        numero: numeroPedido,
         itens: itensArray.join(' | '),
         total: `R$${totalGeral.toFixed(2)}`,
         endereco: endereco

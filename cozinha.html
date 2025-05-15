@@ -48,10 +48,11 @@
             <table class="tabela-cozinha nova-tabela-cozinha">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>Pronto</th>
                         <th>Itens do Pedido</th>
                         <th>Total</th>
                         <th>Endereço</th>
+                        <th>Número do Pedido</th>
                     </tr>
                 </thead>
                 <tbody id="listaPedidos"></tbody>
@@ -61,27 +62,32 @@
     <script>
         function mostrarPedidosGoogleSheets() {
             const listaPedidos = document.getElementById('listaPedidos');
-            listaPedidos.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+            listaPedidos.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
             fetch('https://script.google.com/macros/s/AKfycbwjATKIyrbFCtxkx9rnMqzrtpuVn-NoNLI2Otzl4VJnrmDuW22rb4UuXVhKVpS2W0IW/exec')
                 .then(res => res.json())
                 .then(data => {
                     listaPedidos.innerHTML = '';
                     if (!data || !data.length) {
-                        listaPedidos.innerHTML = '<tr><td colspan="4">Nenhum pedido recebido ainda.</td></tr>';
+                        listaPedidos.innerHTML = '<tr><td colspan="5">Nenhum pedido recebido ainda.</td></tr>';
                         return;
                     }
                     data.slice().reverse().forEach((row, idx) => {
+                        let numero = row.numero || row.Numero || row.número;
+                        if (!numero && Array.isArray(Object.values(row)) && Object.values(row).length > 0) {
+                            numero = Object.values(row)[Object.values(row).length - 1];
+                        }
                         const itens = row.itens || row.Itens || '';
                         const total = row.total || row.Total || '';
-                        const endereco = row.endereco || row.Endereço || '';
+                        const endereco = row.endereco || row.Endereço || row.endereço || '';
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td style='font-weight:bold; color:#25d366;'>
-                                <input type='checkbox' class='pronto-checkbox' data-idx='${idx}' style='margin-right:8px;'>${idx+1}
+                            <td style='text-align:center;'>
+                                <input type='checkbox' class='pronto-checkbox' data-idx='${idx}'>
                             </td>
                             <td>${itens.split(' | ').map(i => `<div class='item-pedido'>${i}</div>`).join('')}</td>
                             <td style='color:#f87e28; font-weight:bold;'>${total}</td>
                             <td><span class='endereco-pedido'>${endereco}</span></td>
+                            <td style='font-weight:bold; color:#25d366;'>${numero || idx+1}</td>
                         `;
                         listaPedidos.appendChild(tr);
                     });
@@ -99,7 +105,7 @@
                     }, 100);
                 })
                 .catch(() => {
-                    listaPedidos.innerHTML = '<tr><td colspan="4">Erro ao carregar pedidos.</td></tr>';
+                    listaPedidos.innerHTML = '<tr><td colspan="5">Erro ao carregar pedidos.</td></tr>';
                 });
         }
         window.onload = mostrarPedidosGoogleSheets;
