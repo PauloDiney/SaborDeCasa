@@ -333,6 +333,32 @@ main {
   transition: all 0.3s ease;
 }
 
+.cart_bar input#endereco-input {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #25d366;
+  font-size: 1rem;
+  background: #f9f9f9;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.cart_bar label[for="endereco-input"] {
+  font-size: 1rem;
+  color: #333;
+  margin-right: 8px;
+  min-width: 150px;
+}
+
+.cart_bar .endereco-div {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
 .cart_items_list {
   max-height: 200px;
   overflow-y: auto;
@@ -415,6 +441,105 @@ main {
 
 #checkout-btn:hover {
   background-color: #1ca450;
+}
+
+.tabela-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: linear-gradient(90deg, #f4f4f4 0%, #e9ffe6 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(34, 139, 34, 0.08);
+  padding: 16px 0 8px 0;
+}
+
+.nova-tabela-cozinha {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.nova-tabela-cozinha th, .nova-tabela-cozinha td {
+  border-bottom: 1.5px solid #e0e0e0;
+  padding: 16px 14px;
+  text-align: left;
+  font-size: 1.15rem;
+}
+
+.nova-tabela-cozinha th {
+  background: #25d366;
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  border: none;
+}
+
+.nova-tabela-cozinha tr:last-child td {
+  border-bottom: none;
+}
+
+.nova-tabela-cozinha tr:nth-child(even) {
+  background: #f7f7f7;
+}
+
+.nova-tabela-cozinha tr:hover {
+  background: #e9ffe6;
+}
+
+.nova-tabela-cozinha td {
+  vertical-align: top;
+}
+
+.item-pedido {
+  margin-bottom: 4px;
+  padding: 2px 0;
+  border-left: 3px solid #25d366;
+  padding-left: 8px;
+  font-size: 1.05rem;
+}
+
+.endereco-pedido {
+  display: inline-block;
+  background: #fffbe6;
+  color: #5a3a1a;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px rgba(248,126,40,0.07);
+}
+
+.tabela-cozinha {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.tabela-cozinha th, .tabela-cozinha td {
+  border: 1px solid #eee;
+  padding: 12px 10px;
+  text-align: left;
+  font-size: 1.1rem;
+}
+.tabela-cozinha th {
+  background: #25d366;
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.tabela-cozinha tr:nth-child(even) {
+  background: #f7f7f7;
+}
+.tabela-cozinha tr:hover {
+  background: #e9ffe6;
+}
+.tabela-cozinha td {
+  vertical-align: top;
 }
 
 

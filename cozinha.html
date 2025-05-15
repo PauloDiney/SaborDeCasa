@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página da Cozinha</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+    <style>
+        .senha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 100px;
+            color: orange;
+            gap: 2em;
+        }
+
+        .senha-container input{
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .senha-container button{
+            background-color: #25d366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .pedidos-container {
+            display: none;
+            margin: 40px auto;
+            max-width: 600px;
+            background: #fafafa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        .tabela-wrapper {
+            overflow-x: auto;
+        }
+        .nova-tabela-cozinha {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        .nova-tabela-cozinha th, .nova-tabela-cozinha td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .nova-tabela-cozinha th {
+            background-color: #25d366;
+            color: #fff;
+            font-weight: bold;
+        }
+        .item-pedido {
+            color: #333;
+        }
+        .endereco-pedido {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="senha-container" id="senhaContainer">
+        <h2>Área restrita</h2>
+        <input type="password" id="senhaInput" placeholder="Digite a senha de acesso">
+        <button onclick="verificarSenha()">Entrar</button>
+        <p id="mensagemErro" style="color:red;"></p>
+    </div>
+    <div class="pedidos-container" id="pedidosContainer">
+        <h2 style="text-align:center; color:#25d366; margin-bottom: 24px; letter-spacing: 1px;">Pedidos Recebidos</h2>
+        <div class="tabela-wrapper">
+            <table class="tabela-cozinha nova-tabela-cozinha">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Itens do Pedido</th>
+                        <th>Total</th>
+                        <th>Endereço</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPedidos"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const SENHA = "190401"; // Altere para a senha desejada
+        function verificarSenha() {
+            const senha = document.getElementById('senhaInput').value;
+            if (senha === SENHA) {
+                document.getElementById('senhaContainer').style.display = 'none';
+                document.getElementById('pedidosContainer').style.display = 'block';
+                mostrarPedidos();
+            } else {
+                document.getElementById('mensagemErro').innerText = 'Senha incorreta!';
+            }
+        }
+        function mostrarPedidos() {
+            const listaPedidos = document.getElementById('listaPedidos');
+            listaPedidos.innerHTML = '';
+            const pedidos = JSON.parse(localStorage.getItem('pedidosCozinha') || '[]');
+            if (pedidos.length === 0) {
+                listaPedidos.innerHTML = '<tr><td colspan="4">Nenhum pedido recebido ainda.</td></tr>';
+                return;
+            }
+            pedidos.forEach((pedido, idx) => {
+                let itens = pedido.split(/\n|\\n/).filter(l => l.trim().startsWith('-'));
+                let total = '';
+                let endereco = '';
+                pedido.split(/\n|\\n/).forEach(l => {
+                    if (l.trim().toLowerCase().startsWith('total:')) total = l.replace('Total:', '').trim();
+                    if (l.trim().toLowerCase().startsWith('endereço:')) endereco = l.replace('Endereço:', '').trim();
+                });
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style='font-weight:bold; color:#25d366;'>
+                        <input type='checkbox' class='pronto-checkbox' data-idx='${idx}' style='margin-right:8px;'>${idx+1}
+                    </td>
+                    <td>${itens.map(i => `<div class='item-pedido'>${i.replace('-', '').trim()}</div>`).join('')}</td>
+                    <td style='color:#f87e28; font-weight:bold;'>${total}</td>
+                    <td><span class='endereco-pedido'>${endereco}</span></td>
+                `;
+                listaPedidos.appendChild(tr);
+            });
+            // Evento para marcar linha como pronta
+            setTimeout(() => {
+                document.querySelectorAll('.pronto-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const linha = this.closest('tr');
+                        if (this.checked) {
+                            linha.style.backgroundColor = '#ffb3b3'; // vermelho claro
+                        } else {
+                            linha.style.backgroundColor = '';
+                        }
+                    });
+                });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
