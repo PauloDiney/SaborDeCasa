@@ -129,29 +129,43 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    let itensArray = [];
     let message = `Olá! Gostaria de fazer o seguinte pedido:%0A`;
-    let pedidoTexto = `Olá! Gostaria de fazer o seguinte pedido:\n`;
     cart.forEach(item => {
       const totalQtd = item.qty * item.quantidade;
       const totalItem = item.qty * item.price;
       message += `- ${totalQtd} ${item.name} por R$${totalItem.toFixed(2)}%0A`;
-      pedidoTexto += `- ${totalQtd} ${item.name} por R$${totalItem.toFixed(2)}\n`;
+      itensArray.push(`${totalQtd} ${item.name} por R$${totalItem.toFixed(2)}`);
     });
 
     let totalGeral = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
     message += `%0ATotal: R$${totalGeral.toFixed(2)}%0A`;
     message += `%0AEndereço: ${encodeURIComponent(endereco)}`;
-    pedidoTexto += `\nTotal: R$${totalGeral.toFixed(2)}\n`;
-    pedidoTexto += `Endereço: ${endereco}`;
 
-    // Salva o pedido no localStorage para a cozinha
-    let pedidosCozinha = JSON.parse(localStorage.getItem('pedidosCozinha') || '[]');
-    pedidosCozinha.push(pedidoTexto);
-    localStorage.setItem('pedidosCozinha', JSON.stringify(pedidosCozinha));
+    // Envia para o Google Sheets
+    fetch('https://script.google.com/macros/s/AKfycbzB_5FpBjyGflQAMbVAitXvMUlpVMEmI23UG6NJ7mZcThm-VkoFBYmhExEY1BdA2ziE/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        itens: itensArray.join(' | '),
+        total: `R$${totalGeral.toFixed(2)}`,
+        endereco: endereco
+      })
+    });
 
     const phone = "5518981274159";
     const url = `https://wa.me/${phone}?text=${message}`;
     window.open(url, "_blank");
   });
+
+  fetch('https://script.google.com/macros/s/SEU_ID/exec')
+    .then(res => res.json())
+    .then(data => {
+      // data é um array de objetos [{itens:..., total:..., endereco:...}, ...]
+      // Monte a tabela igual já faz!
+    });
 
   updateCartUI();

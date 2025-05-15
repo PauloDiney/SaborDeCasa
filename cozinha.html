@@ -7,34 +7,7 @@
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
     <style>
-        .senha-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 100px;
-            color: orange;
-            gap: 2em;
-        }
-
-        .senha-container input{
-            width: 300px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .senha-container button{
-            background-color: #25d366;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
         .pedidos-container {
-            display: none;
             margin: 40px auto;
             max-width: 600px;
             background: #fafafa;
@@ -69,12 +42,6 @@
     </style>
 </head>
 <body>
-    <div class="senha-container" id="senhaContainer">
-        <h2>Área restrita</h2>
-        <input type="password" id="senhaInput" placeholder="Digite a senha de acesso">
-        <button onclick="verificarSenha()">Entrar</button>
-        <p id="mensagemErro" style="color:red;"></p>
-    </div>
     <div class="pedidos-container" id="pedidosContainer">
         <h2 style="text-align:center; color:#25d366; margin-bottom: 24px; letter-spacing: 1px;">Pedidos Recebidos</h2>
         <div class="tabela-wrapper">
@@ -92,58 +59,50 @@
         </div>
     </div>
     <script>
-        const SENHA = "190401"; // Altere para a senha desejada
-        function verificarSenha() {
-            const senha = document.getElementById('senhaInput').value;
-            if (senha === SENHA) {
-                document.getElementById('senhaContainer').style.display = 'none';
-                document.getElementById('pedidosContainer').style.display = 'block';
-                mostrarPedidos();
-            } else {
-                document.getElementById('mensagemErro').innerText = 'Senha incorreta!';
-            }
-        }
-        function mostrarPedidos() {
+        function mostrarPedidosGoogleSheets() {
             const listaPedidos = document.getElementById('listaPedidos');
-            listaPedidos.innerHTML = '';
-            const pedidos = JSON.parse(localStorage.getItem('pedidosCozinha') || '[]');
-            if (pedidos.length === 0) {
-                listaPedidos.innerHTML = '<tr><td colspan="4">Nenhum pedido recebido ainda.</td></tr>';
-                return;
-            }
-            pedidos.forEach((pedido, idx) => {
-                let itens = pedido.split(/\n|\\n/).filter(l => l.trim().startsWith('-'));
-                let total = '';
-                let endereco = '';
-                pedido.split(/\n|\\n/).forEach(l => {
-                    if (l.trim().toLowerCase().startsWith('total:')) total = l.replace('Total:', '').trim();
-                    if (l.trim().toLowerCase().startsWith('endereço:')) endereco = l.replace('Endereço:', '').trim();
-                });
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style='font-weight:bold; color:#25d366;'>
-                        <input type='checkbox' class='pronto-checkbox' data-idx='${idx}' style='margin-right:8px;'>${idx+1}
-                    </td>
-                    <td>${itens.map(i => `<div class='item-pedido'>${i.replace('-', '').trim()}</div>`).join('')}</td>
-                    <td style='color:#f87e28; font-weight:bold;'>${total}</td>
-                    <td><span class='endereco-pedido'>${endereco}</span></td>
-                `;
-                listaPedidos.appendChild(tr);
-            });
-            // Evento para marcar linha como pronta
-            setTimeout(() => {
-                document.querySelectorAll('.pronto-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        const linha = this.closest('tr');
-                        if (this.checked) {
-                            linha.style.backgroundColor = '#ffb3b3'; // vermelho claro
-                        } else {
-                            linha.style.backgroundColor = '';
-                        }
+            listaPedidos.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+            fetch('https://script.google.com/macros/s/AKfycbwjATKIyrbFCtxkx9rnMqzrtpuVn-NoNLI2Otzl4VJnrmDuW22rb4UuXVhKVpS2W0IW/exec')
+                .then(res => res.json())
+                .then(data => {
+                    listaPedidos.innerHTML = '';
+                    if (!data || !data.length) {
+                        listaPedidos.innerHTML = '<tr><td colspan="4">Nenhum pedido recebido ainda.</td></tr>';
+                        return;
+                    }
+                    data.slice().reverse().forEach((row, idx) => {
+                        const itens = row.itens || row.Itens || '';
+                        const total = row.total || row.Total || '';
+                        const endereco = row.endereco || row.Endereço || '';
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style='font-weight:bold; color:#25d366;'>
+                                <input type='checkbox' class='pronto-checkbox' data-idx='${idx}' style='margin-right:8px;'>${idx+1}
+                            </td>
+                            <td>${itens.split(' | ').map(i => `<div class='item-pedido'>${i}</div>`).join('')}</td>
+                            <td style='color:#f87e28; font-weight:bold;'>${total}</td>
+                            <td><span class='endereco-pedido'>${endereco}</span></td>
+                        `;
+                        listaPedidos.appendChild(tr);
                     });
+                    setTimeout(() => {
+                        document.querySelectorAll('.pronto-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                const linha = this.closest('tr');
+                                if (this.checked) {
+                                    linha.style.backgroundColor = '#ffb3b3';
+                                } else {
+                                    linha.style.backgroundColor = '';
+                                }
+                            });
+                        });
+                    }, 100);
+                })
+                .catch(() => {
+                    listaPedidos.innerHTML = '<tr><td colspan="4">Erro ao carregar pedidos.</td></tr>';
                 });
-            }, 100);
         }
+        window.onload = mostrarPedidosGoogleSheets;
     </script>
 </body>
 </html>
