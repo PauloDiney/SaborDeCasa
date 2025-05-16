@@ -129,8 +129,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Gera número do pedido de 5 dígitos aleatórios
+    // Gera númer do pedido de 5 dígitos aleatórios
     const numeroPedido = Math.floor(10000 + Math.random() * 90000);
+
+    // Data do pedido (formato brasileiro)
+    const dataPedido = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
     let itensArray = [];
     let message = `Olá! Gostaria de fazer o seguinte pedido (Nº ${numeroPedido}):%0A`;
@@ -146,18 +149,22 @@ document.addEventListener("DOMContentLoaded", () => {
     message += `%0AEndereço: ${encodeURIComponent(endereco)}`;
     message += `%0A*Número do pedido: ${numeroPedido}*`;
 
-    // Envia para o Google Sheets
-    fetch('https://script.google.com/macros/s/AKfycbxmQ-Nm-MjHvYs3kCY6NHbJwh3KTC1OiNnxNbbNJpuIA0EcSenSKJiKUvrJBkOPb09N/exec', {
+    // Envia para o Google Sheets (NOVA URL e NOVOS CAMPOS)
+    fetch('https://script.google.com/macros/s/AKfycbwTKKAS9UmXjPWxovBLLUkmmG8W7CoruxG4WjgX81evbH24RzI9W43f28ictlUaWe6dmQ/exec', {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'no-cors', // Necessário para evitar bloqueio CORS em alguns ambientes
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        numero: numeroPedido,
-        itens: itensArray.join(' | '),
-        total: `R$${totalGeral.toFixed(2)}`,
-        endereco: endereco
+        acao: 'adicionar',
+        pedido: {
+          Ticket: numeroPedido,
+          Data: dataPedido,
+          Produtos: itensArray.join(' | '),
+          Total: `R$${totalGeral.toFixed(2)}`,
+          Endereco: endereco
+        }
       })
     });
 
@@ -166,11 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
     window.open(url, "_blank");
   });
 
-  fetch('https://script.google.com/macros/s/SEU_ID/exec')
-    .then(res => res.json())
-    .then(data => {
-      // data é um array de objetos [{itens:..., total:..., endereco:...}, ...]
-      // Monte a tabela igual já faz!
-    });
+  // fetch('https://script.google.com/macros/s/SEU_ID/exec')
+  // .then(res => res.json())
+  // .then(data => {
+  //   // data é um array de objetos [{itens:..., total:..., endereco:...}, ...]
+  //   // Monte a tabela igual já faz!
+  // });
 
   updateCartUI();

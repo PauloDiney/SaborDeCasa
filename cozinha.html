@@ -63,7 +63,7 @@
         function mostrarPedidosGoogleSheets() {
             const listaPedidos = document.getElementById('listaPedidos');
             listaPedidos.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
-            fetch('https://script.google.com/macros/s/AKfycbwjATKIyrbFCtxkx9rnMqzrtpuVn-NoNLI2Otzl4VJnrmDuW22rb4UuXVhKVpS2W0IW/exec')
+            fetch('https://script.google.com/macros/s/AKfycbwTKKAS9UmXjPWxovBLLUkmmG8W7CoruxG4WjgX81evbH24RzI9W43f28ictlUaWe6dmQ/exec')
                 .then(res => res.json())
                 .then(data => {
                     listaPedidos.innerHTML = '';
@@ -72,22 +72,20 @@
                         return;
                     }
                     data.slice().reverse().forEach((row, idx) => {
-                        let numero = row.numero || row.Numero || row.número;
-                        if (!numero && Array.isArray(Object.values(row)) && Object.values(row).length > 0) {
-                            numero = Object.values(row)[Object.values(row).length - 1];
-                        }
-                        const itens = row.itens || row.Itens || '';
-                        const total = row.total || row.Total || '';
-                        const endereco = row.endereco || row.Endereço || row.endereço || '';
+                        const ticket = row.Ticket || row.ticket || row.TICKET || '';
+                        const produtos = row.Produtos || row.produtos || row.PRODUTOS || '';
+                        const total = row.Total || row.total || row.TOTAL || '';
+                        const endereco = row.Endereco || row.endereco || row.ENDERECO || '';
+                        const dataPedido = row.Data || row.data || row.DATA || '';
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td style='text-align:center;'>
-                                <input type='checkbox' class='pronto-checkbox' data-idx='${idx}'>
+                                <input type='checkbox' class='pronto-checkbox' data-ticket='${ticket}'>
                             </td>
-                            <td>${itens.split(' | ').map(i => `<div class='item-pedido'>${i}</div>`).join('')}</td>
+                            <td>${produtos.split(' | ').map(i => `<div class='item-pedido'>${i}</div>`).join('')}</td>
                             <td style='color:#f87e28; font-weight:bold;'>${total}</td>
                             <td><span class='endereco-pedido'>${endereco}</span></td>
-                            <td style='font-weight:bold; color:#25d366;'>${numero || idx+1}</td>
+                            <td style='font-weight:bold; color:#25d366;'>${ticket}</td>
                         `;
                         listaPedidos.appendChild(tr);
                     });
@@ -97,6 +95,16 @@
                                 const linha = this.closest('tr');
                                 if (this.checked) {
                                     linha.style.backgroundColor = '#ffb3b3';
+                                    // Remover pedido da planilha
+                                    fetch('https://script.google.com/macros/s/AKfycbwTKKAS9UmXjPWxovBLLUkmmG8W7CoruxG4WjgX81evbH24RzI9W43f28ictlUaWe6dmQ/exec', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ acao: 'remover', ticket: this.dataset.ticket })
+                                    })
+                                    .then(() => {
+                                        // Atualiza a lista após remover
+                                        setTimeout(mostrarPedidosGoogleSheets, 800);
+                                    });
                                 } else {
                                     linha.style.backgroundColor = '';
                                 }
